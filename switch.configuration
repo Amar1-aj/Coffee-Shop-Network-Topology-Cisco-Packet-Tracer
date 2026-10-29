@@ -1,0 +1,114 @@
+## 1. Basic switch configuration
+
+enable
+configure terminal
+hostname CoffeeShop-SW
+no ip domain-lookup
+enable secret Cisco123!
+service password-encryption
+banner motd #Unauthorized access is prohibited#
+
+line console 0
+password Cisco123!
+login
+logging synchronous
+exit
+
+## 2. Create VLANs
+
+vlan 10
+name MANAGEMENT_OFFICE
+exit
+
+vlan 20
+name POS
+exit
+
+vlan 30
+name GUEST_WIFI
+exit
+
+vlan 99
+name NETWORK_MANAGEMENT
+exit
+
+## VLAN 10 — Office devices
+
+interface range fa0/2 - 3
+description MANAGEMENT_OFFICE_DEVICES
+switchport mode access
+switchport access vlan 10
+spanning-tree portfast
+exit
+
+## VLAN 20 — POS devices
+
+interface range fa0/5, fa0/7
+description POS_DEVICES
+switchport mode access
+switchport access vlan 20
+spanning-tree portfast
+exit
+
+## VLAN 30 — Guest wireless access point
+
+interface fa0/11
+description GUEST_WIRELESS_ACCESS_POINT
+switchport mode access
+switchport access vlan 30
+spanning-tree portfast
+exit
+
+## 4. Configure trunk port to router
+
+
+interface fa0/1
+description TO_COFFESHOP_RTR
+switchport mode trunk
+switchport trunk allowed vlan 10,20,30,99
+no shutdown
+exit
+
+## 5. Configure switch management IP
+
+interface vlan 99
+description SWITCH_MANAGEMENT
+ip address 192.168.99.2 255.255.255.0
+no shutdown
+exit
+
+ip default-gateway 192.168.99.1
+
+## 6. Configure SSH remote access
+
+ip domain-name ittechstudies.local
+username admin privilege 15 secret Cisco123!
+crypto key generate rsa
+
+ip ssh version 2
+
+line vty 0 15
+login local
+transport input ssh
+exec-timeout 10 0
+exit
+
+end
+copy running-config startup-config
+
+## 7. Verify the switch configuration
+
+show vlan brief
+show interfaces trunk
+show ip interface brief
+show running-config
+show ip ssh
+
+
+
+
+
+
+
+
+
