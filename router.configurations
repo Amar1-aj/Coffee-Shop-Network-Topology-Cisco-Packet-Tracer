@@ -1,0 +1,112 @@
+## 1. Basic router configuration
+
+enable
+configure terminal
+hostname CoffeeShop-RTR
+no ip domain-lookup
+enable secret Cisco123!
+service password-encryption
+banner motd #Unauthorized access is prohibited#
+
+line console 0
+password Cisco123!
+login
+logging synchronous
+exit
+
+## 2. Configure physical interfaces
+
+interface gigabitEthernet0/0
+description TO_ISP
+no shutdown
+exit
+
+interface gigabitEthernet0/1
+description TO_COFFESHOP_SW
+no shutdown
+exit
+
+## 3. Configure inter-VLAN routing
+
+interface gigabitEthernet0/1.10
+description MANAGEMENT_OFFICE_GATEWAY
+encapsulation dot1Q 10
+ip address 192.168.10.1 255.255.255.0
+exit
+
+interface gigabitEthernet0/1.20
+description POS_GATEWAY
+encapsulation dot1Q 20
+ip address 192.168.20.1 255.255.255.0
+exit
+
+interface gigabitEthernet0/1.30
+description GUEST_WIFI_GATEWAY
+encapsulation dot1Q 30
+ip address 192.168.30.1 255.255.255.0
+exit
+
+interface gigabitEthernet0/1.99
+description NETWORK_MANAGEMENT_GATEWAY
+encapsulation dot1Q 99
+ip address 192.168.99.1 255.255.255.0
+exit
+
+## 4. Configure DHCP 
+
+ip dhcp excluded-address 192.168.10.1 192.168.10.20
+ip dhcp excluded-address 192.168.20.1 192.168.20.20
+ip dhcp excluded-address 192.168.30.1 192.168.30.20
+
+ip dhcp pool MANAGEMENT_OFFICE
+network 192.168.10.0 255.255.255.0
+default-router 192.168.10.1
+dns-server 8.8.8.8
+exit
+
+ip dhcp pool POS
+network 192.168.20.0 255.255.255.0
+default-router 192.168.20.1
+dns-server 8.8.8.8
+exit
+
+ip dhcp pool GUEST_WIFI
+network 192.168.30.0 255.255.255.0
+default-router 192.168.30.1
+dns-server 8.8.8.8
+exit
+
+## 5. Configure guest network security (ACL)
+
+ip access-list extended GUEST_RESTRICTIONS
+permit udp any eq 68 any eq 67
+deny ip 192.168.30.0 0.0.0.255 192.168.10.0 0.0.0.255
+deny ip 192.168.30.0 0.0.0.255 192.168.20.0 0.0.0.255
+deny ip 192.168.30.0 0.0.0.255 192.168.99.0 0.0.0.255
+permit ip 192.168.30.0 0.0.0.255 any
+exit
+
+interface gigabitEthernet0/1.30
+ip access-group GUEST_RESTRICTIONS in
+exit
+
+## 6. Save the configuration
+
+end
+copy running-config startup-config
+
+## 7. Verification commands
+
+show ip interface brief
+show ip dhcp pool
+show ip dhcp binding
+show ip access-lists
+show running-config
+
+
+
+
+
+
+
+
