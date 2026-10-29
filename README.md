@@ -3,7 +3,9 @@
 📌 Project Overview
 
 This project demonstrates the design and configuration of a small coffee shop network using Cisco Packet Tracer. The network separates office devices, Point of Sale (POS) devices, guest Wi-Fi users, and network management traffic using VLANs.
+
 The project uses a Cisco router for inter-VLAN routing, DHCP services, and access control, while a switch connects wired devices and a wireless access point.
+
 The objective is to build a segmented, manageable, and secure network suitable for a small business environment.
 
 🎯 Project Objectives
@@ -34,17 +36,29 @@ The objective is to build a segmented, manageable, and secure network suitable f
 🖥️ Network Topology
 
 The network contains the following devices:
+
 Device	Purpose
+
 CoffeeShop-RTR	Routing, DHCP, and guest traffic filtering
+
 CoffeeShop-SW	VLAN creation, switching, and trunk connectivity
+
 Wireless Access Point	Provides guest Wi-Fi connectivity
+
 Manager PC	Office administration
+
 Office Printer	Office printing
+
 POS Terminal	Point of Sale operations
+
 Receipt Printer	POS receipt printing
+
 Guest Laptop 1	Guest wireless access
+
 Guest Laptop 2	Guest wireless access
+
 ISP Cloud	Represents the external network
+
 Topology image: Save your Cisco Packet Tracer screenshot as images/coffeeshop-topology.png and upload it to the repository. Update the filename below if you use a different name.
 
 🗺️ Network Architecture
@@ -71,23 +85,38 @@ The router connects to the switch through an 802.1Q trunk. Router subinterfaces 
 🌐 VLAN and IP Addressing Plan
 
 VLAN ID	VLAN Name	Network	Default Gateway
+
 10	MANAGEMENT_OFFICE	192.168.10.0/24	192.168.10.1
 20	POS	192.168.20.0/24	192.168.20.1
 30	GUEST_WIFI	192.168.30.0/24	192.168.30.1
 99	NETWORK_MANAGEMENT	192.168.99.0/24	192.168.99.1
+
 IP Address Assignments
+
 Device	IP Address	Assignment
+
 Router VLAN 10 gateway	192.168.10.1	Static
+
 Office Printer	192.168.10.10	Static
+
 Manager PC	192.168.10.21 onward	DHCP
+
 Router VLAN 20 gateway	192.168.20.1	Static
+
 Receipt Printer	192.168.20.10	Static
+
 POS Terminal	192.168.20.21 onward	DHCP
+
 Router VLAN 30 gateway	192.168.30.1	Static
+
 Guest Laptop 1	192.168.30.21 onward	DHCP
+
 Guest Laptop 2	192.168.30.21 onward	DHCP pool, with a unique lease per device
+
 Switch management SVI	192.168.99.2	Static
+
 Router VLAN 99 gateway	192.168.99.1	Static
+
 All networks use the subnet mask 255.255.255.0.
 
 Note: The switch management IP belongs to VLAN 99. The DHCP pools exclude .1 through .20, reserving these addresses for gateways and static devices.
@@ -97,6 +126,7 @@ Note: The switch management IP belongs to VLAN 99. The DHCP pools exclude .1 thr
 The following configuration uses the switch as a Layer 2 VLAN switch with a management SVI and a trunk to the router.
 
 1. Basic Configuration
+   
 enable
 configure terminal
 hostname CoffeeShop-SW
@@ -151,7 +181,9 @@ switchport mode access
 switchport access vlan 30
 spanning-tree portfast
 exit
+
 Assign the office printer and Manager PC to VLAN 10. Assign the POS terminal and receipt printer to VLAN 20. Assign the wireless access point to VLAN 30.
+
 Important: Confirm port numbers in Packet Tracer before using these commands. Each access port must belong to the appropriate VLAN, and a physical port should not be assigned to conflicting roles.
 
 4. Configure the Router Trunk
@@ -334,13 +366,16 @@ Security Notes
 📶 Configuration 5: Wireless Access Point
 
 Configure the wireless access point in Packet Tracer using the following settings:
+
 Setting	Value
+
 SSID	Coffeeshop-Guest
 Security	WPA2-PSK
 Authentication	Pre-shared key
 Password	Use a strong, unique lab password
 Connected switch VLAN	VLAN 30
 Connect the Guest Laptops
+
 1.	Open each laptop in Packet Tracer.
 2.	If required, install a compatible wireless network adapter in the Physical tab.
 3.	Open the wireless utility or configuration page.
@@ -348,70 +383,108 @@ Connect the Guest Laptops
 5.	Enter the configured WPA2-PSK password.
 6.	Open Desktop → IP Configuration.
 7.	Select DHCP.
+   
 Expected guest addressing:
+
 •	IP address: 192.168.30.x
 •	Subnet mask: 255.255.255.0
 •	Default gateway: 192.168.30.1
+
 🖨️ Configuration 6: Printers and End Devices
+
 Office Printer
+
 Configure a static IP address:
 IP address:      192.168.10.10
 Subnet mask:     255.255.255.0
 Default gateway: 192.168.10.1
 DNS server:      8.8.8.8
+
 Receipt Printer
+
 Configure a static IP address:
+
 IP address:      192.168.20.10
 Subnet mask:     255.255.255.0
 Default gateway: 192.168.20.1
 DNS server:      8.8.8.8
+
 Manager PC and POS Terminal
+
 Select DHCP in the IP Configuration window.
+
 •	Manager PC: VLAN 10
 •	POS Terminal: VLAN 20
+
 🧪 Configuration 7: Verification and Testing
+
 Switch Verification
 show vlan brief
 show interfaces trunk
 show ip interface brief
 show running-config
+
 Check that the access ports are assigned to the correct VLANs and the trunk permits VLANs 10, 20, 30, and 99.
 Router Verification
+
 show ip interface brief
 show ip dhcp pool
 show ip dhcp binding
 show ip access-lists
 show running-config
+
 Check that the router subinterfaces are operational, DHCP pools exist, clients have received leases, and ACL rules are installed.
 Connectivity Testing
+
 From a guest laptop:
+
 ipconfig
 ping 192.168.30.1
 From the Manager PC, test:
 ping 192.168.10.1
 ping 192.168.10.10
+
 From the POS Terminal, test:
+
 ping 192.168.20.1
 ping 192.168.20.10
+
 From a guest laptop, test access to internal networks:
+
 ping 192.168.10.10
 ping 192.168.20.10
 ping 192.168.99.2
+
 The guest-to-internal tests should be blocked by the ACL. A failed ping alone is not definitive proof of ACL operation; check ACL counters and ensure the destination is online.
+
 🛠️ Troubleshooting
+
 Problem	Checks and possible solution
+
 Guest laptop does not receive an IP address	Verify DHCP pool, wireless association, VLAN 30 assignment, trunk configuration, and ACL DHCP permit
+
 Laptop cannot ping 192.168.30.1	Check laptop IP configuration, router subinterface status, VLAN 30, and trunk
+
 Office PC cannot reach its gateway	Check VLAN 10 port assignment and router subinterface
+
 POS terminal cannot reach its gateway	Check VLAN 20 port assignment and router subinterface
+
 Guest can reach internal networks	Verify ACL entries, inbound application, and rule counters
+
 SSH does not work	Verify RSA keys, local username, VTY configuration, and management IP reachability
+
 Internet is unavailable	Verify ISP interface addressing, routing, and NAT where required
+
 💾 Saving the Configuration
+
 On the router and switch:
+
 copy running-config startup-config
+
 Save the Packet Tracer project using File → Save As and include the .pkt file in the GitHub repository if you want others to inspect and reproduce the topology.
+
 📁 Suggested GitHub Repository Structure
+
 coffee-shop-network-topology/
 │
 ├── README.md
@@ -421,8 +494,11 @@ coffee-shop-network-topology/
 └── configurations/
     ├── router-config.txt
     └── switch-config.txt
+    
 🚀 Learning Outcomes
+
 Through this project, I practised:
+
 •	Creating and managing VLANs.
 •	Configuring 802.1Q trunks.
 •	Implementing inter-VLAN routing with router subinterfaces.
@@ -431,7 +507,9 @@ Through this project, I practised:
 •	Applying extended ACLs to isolate guest traffic.
 •	Configuring switch management and SSH.
 •	Testing connectivity and troubleshooting network configuration issues.
+
 🔮 Future Improvements
+
 •	Configure NAT and default routing for Internet access.
 •	Add a dedicated firewall or stronger guest isolation.
 •	Implement a dedicated management VLAN access policy.
